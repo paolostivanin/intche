@@ -9,7 +9,7 @@ NOFLAGS = -Wno-missing-field-initializers -Wno-return-type -Wno-cast-qual
 
 LDFLAGS = -Wl,-z,now -Wl,-z,relro
 
-LIBS = $(shell pkg-config --libs glib-2.0 gio-2.0)
+LIBS = -lgcrypt $(shell pkg-config --libs glib-2.0 gio-2.0)
 
 SOURCES = $(wildcard src/*.c)
 OBJS = ${SOURCES:.c=.o}
