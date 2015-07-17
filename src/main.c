@@ -1,23 +1,37 @@
 #include <string.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <sqlite3.h>
 #include "dupfinder.h"
 
 gint
 main (  gint argc,
         gchar **argv)
 {
+	if (argc > 1)
+	{
+		if ((g_strcmp0 (argv[1], "--version") == 0) || (g_strcmp0 (argv[1], "-v") == 0))
+		{
+			g_print ("%s v%s\nDeveloped by %s <%s>\n", PROGRAM_NAME, VERSION, DEVELOPER, DEV_EMAIL);
+			return 0;
+		}
+		else
+			return -1;
+	}
+	
     GDir *dir;
+    GSList *list = NULL;
     GError *err = NULL;
     gint type;
     goffset fsize;
     const gchar *fname;
     const gchar *homedir;
     gchar *cksum;
+    guint i;
 
     homedir = g_get_home_dir ();
 
-    dir = g_dir_open(homedir, 0, &err);
+    dir = g_dir_open (homedir, 0, &err);
     if (err != NULL)
     {
         g_printerr ("%s\n", err->message);
@@ -52,7 +66,8 @@ main (  gint argc,
                     continue;
                 else
                     //put into the 'next_dir' list
-                    g_print ("DIR\t%s\n", fname);
+                    list = g_slist_append (list, (gchar *)fname);
+                    //g_print ("DIR\t%s\n", fname);
             }
             else
                 g_print ("SYMLINK\t%s\n", fname);
@@ -60,7 +75,11 @@ main (  gint argc,
         }
         g_free (path);
     }
+    
+    for (i=0; i<g_slist_length(list); i++)
+		g_print ("DIR %s\n", (gchar *)g_slist_nth_data(list, i));
 
+	g_slist_free(list);
     g_dir_close (dir);
 
     return 0;
