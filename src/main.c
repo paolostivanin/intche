@@ -4,6 +4,7 @@
 #include <sqlite3.h>
 #include "dupfinder.h"
 
+
 gint
 main (  gint argc,
         gchar **argv)
@@ -20,67 +21,52 @@ main (  gint argc,
 	}
 	
     GDir *dir;
+    GDir *dir1;
     GSList *list = NULL;
+    GSList *list1 = NULL;
     GError *err = NULL;
-    gint type;
-    goffset fsize;
-    const gchar *fname;
     const gchar *homedir;
-    gchar *cksum;
     guint i;
+    gboolean excluded;
 
     homedir = g_get_home_dir ();
-
     dir = g_dir_open (homedir, 0, &err);
     if (err != NULL)
     {
         g_printerr ("%s\n", err->message);
         return -1;
     }
-
-    while ((fname = g_dir_read_name (dir)))
-    {
-        if (strlen (fname) > 512)
-        {
-            g_printerr ("Seriously? A name longer than 512 chars?");
-            return -1;
-        }
-        gchar *path = g_strconcat (homedir, "/", fname, NULL);        
-        type = is_dir (path);
-        if (type == 1)
-        {
-            fsize = get_file_size (path);
-            if (fsize > 0)
-            {
-                cksum = compute_crc32 (path, fsize);
-                //insert into db
-                g_print ("FILE\t%s - %s\n", fname, cksum);
-                g_free (cksum);
-            }
-        }
-        else
-        {
-            if (type == 0)
-            {
-                if (*fname == '.')
-                    continue;
-                else
-                    //put into the 'next_dir' list
-                    list = g_slist_append (list, (gchar *)fname);
-                    //g_print ("DIR\t%s\n", fname);
-            }
-            else
-                g_print ("SYMLINK\t%s\n", fname);
     
-        }
-        g_free (path);
-    }
-    
-    for (i=0; i<g_slist_length(list); i++)
-		g_print ("DIR %s\n", (gchar *)g_slist_nth_data(list, i));
+    gchar *excluded_folders_path = g_strconcat (homedir, EXCLUDED_RELATIVE_PATH, NULL);
 
-	g_slist_free(list);
+    g_print ("[!] Checking directory [%s]\n", homedir);
+    list = list_files_and_compute_chksum (homedir, dir);
     g_dir_close (dir);
+
+    /* TODO:
+     * - liste gestite in modo dinamico e non list, list1, etc XD
+     */
+    for (i = 0; i < g_slist_length (list); i++)
+    {
+		excluded = is_folder_excluded (excluded_folders_path, (gchar *)g_slist_nth_data(list, i));
+		if (excluded)
+		{
+			excluded = FALSE;
+			break;
+		}
+		g_print ("[!] Checking directory [%s]\n", (gchar *)g_slist_nth_data(list, i));
+		dir1 = g_dir_open((gchar *)g_slist_nth_data(list, i), 0, &err);
+		if (err != NULL)
+		{
+			g_printerr ("%s\n", err->message);
+			return -1;
+		}
+		list1 = list_files_and_compute_chksum ((gchar *)g_slist_nth_data(list, i), dir1);
+		g_free (g_slist_nth_data(list, i));
+		g_slist_free(list1);
+	}
+	g_slist_free(list);
+	g_free (excluded_folders_path);
 
     return 0;
 }
