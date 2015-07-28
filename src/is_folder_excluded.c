@@ -16,8 +16,13 @@ gboolean is_folder_excluded (gchar *excluded_path, gchar *folder_path)
     err = g_file_get_contents (excluded_path, &contents, NULL, &gerr);
     if (!err)
     {
-        g_printerr ("%s\n", gerr->message);
-        exit (-1);
+        if (gerr->code == G_FILE_ERROR_NOENT)
+            return FALSE;
+        else
+        {
+            g_printerr ("%s\n", gerr->message);
+            exit (-1);
+        }
     }
     
     lines = g_strsplit (contents, "\n", -1);
