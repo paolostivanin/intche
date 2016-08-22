@@ -1,5 +1,4 @@
-#ifndef DUPFINDER_H_INCLUDED
-#define DUPFINDER_H_INCLUDED
+#pragma once
 
 #include <glib.h>
 
@@ -15,5 +14,3 @@ gint is_dir (const gchar *);
 gchar *compute_crc32 (const gchar *, goffset);
 GSList *list_files_and_compute_chksum (const gchar *, GDir *);
 gboolean is_folder_excluded (gchar *, gchar *);
-
-#endif
