@@ -1,10 +1,10 @@
 DupFinder
 =========
+TODO
 
 Requirements
 ------------
-
-* Glib >= 2.42.0
-* GCrypt >= 1.5.0
+* Glib >= 2.66.0
+* GCrypt >= 1.8.0
 * SQLite3 >= 3.8
-* GNU/Linux
+* xxHash >= 0.8.0
