@@ -1,6 +1,6 @@
-DupFinder
+IntChe
 =========
-TODO
+**Int**egrity**Che**cker ...
 
 Requirements
 ------------
